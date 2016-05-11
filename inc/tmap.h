@@ -105,6 +105,9 @@ public:
     /// \brief get Tmin, Tmax, and deltaT
     void caculateTmap();
 
+    /// \brief update Tmap
+    void updateTmap(const char* Tmap_template_file);
+
     /// \brief turn over matrix
     void turnOverMatrix();
 

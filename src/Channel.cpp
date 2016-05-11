@@ -30,6 +30,9 @@ void Channel::read_from_file(size_t N_h, size_t N_w,
   //	  std::cout << std::endl;
   //  }
   channel_file.close();
+
+  _array_mark = new int[_N_h*_N_w];
+  memcpy(_array_mark, _array_ptr, _N_h*_N_w*sizeof(int));
 }
 
 void Channel::correct()
@@ -144,3 +147,224 @@ void Channel::correct()
 	_array_ptr[k]=0;
 
 }
+
+int Channel::adjancentLiquidCellNumber(size_t row, size_t col){
+    int number=0;
+    if (row>0){
+        if(_array_ptr[(row-1)*_N_w+col]>0){
+            number++;
+        }
+    }
+    if (row<_N_w){
+        if(_array_ptr[(row+1)*_N_w+col]>0){
+            number++;
+        }
+    }
+    if(col>0){
+        if(_array_ptr[row*_N_w+col-1]>0){
+            number++;
+        }
+    }
+    if(col<_N_h){
+        if(_array_ptr[row*_N_w+col+1]>0){
+            number++;
+        }
+    }
+    return number;
+}
+
+Location Channel::adjancentLiquidCellLocation(size_t row, size_t col){
+
+    int location_r=0;
+    int location_c=0;
+    // up
+    if (row>0){
+        if(_array_ptr[(row-1)*_N_w+col]>0){
+            location_r=row-1;
+            location_c=col;
+        }
+    }
+    // down
+    if(row<_N_h){
+        if(_array_ptr[(row+1)*_N_w+col]>0){
+            location_r=row+1;
+            location_c=col;
+        }
+    }
+    // left
+    if (col>0){
+        if(_array_ptr[row*_N_w+col-1]>0){
+            location_r=row;
+            location_c=col-1;
+        }
+    }
+    //right
+    if (col<_N_w){
+        if(_array_ptr[row*_N_w+col+1]>0){
+            location_r=row;
+            location_c=col+1;
+        }
+    }
+    assert((location_c!=-1)&&(location_r!=-1));
+    Location location(location_r,location_c);
+
+    return location;
+}
+
+void Channel::checkConnect(size_t row, size_t col){
+    if (_array_ptr[row*_N_w+col]>0){
+        if (adjancentLiquidCellNumber(row,col)==0){
+            _array_ptr[row*_N_w+col]=0;
+        }
+        else if (adjancentLiquidCellNumber(row,col)==1){
+            _array_ptr[row*_N_w+col]=0;
+            Location location=Location();
+            location=adjancentLiquidCellLocation(row,col);
+            checkConnect(location.getRow(),location.getCol());
+        }
+    }
+}
+
+void Channel::fillChannel(size_t row, size_t col){
+
+    if(_array_ptr[row*_N_w+col]!=-1){
+        if((row>0)&&(row<_N_h-1)&&(col>0)&&(col<_N_w-1)){
+            _array_ptr[row*_N_w+col]=0;
+            checkConnect(row  ,col+1);
+            checkConnect(row-1,col  );
+            checkConnect(row  ,col-1);
+            checkConnect(row+1,col  );
+        }
+        else if ((row==0)&&(col>0)&&(col<_N_w-1)){
+            _array_ptr[row*_N_w+col]=0;
+            checkConnect(row+1,col);
+        }
+        else if((row==_N_h-1)&&(col>0)&&(col<_N_w-1)){
+            _array_ptr[row*_N_w+col]=0;
+            checkConnect(row-1,col);
+        }
+        else if((col==0)&&(row>0)&&(row<_N_h-1)){
+            _array_ptr[row*_N_w+col]=0;
+            checkConnect(row,col+1);
+        }
+        else if((col==_N_w-1)&&(row>0)&&(row<_N_h)){
+            _array_ptr[row*_N_w+col]=0;
+            checkConnect(row,col-1);
+        }
+    }
+    else {
+        if ((row==0)&&(col==0)){
+            _array_ptr[(row+1)*_N_w+col]=0;
+            _array_ptr[row*_N_w+col+1]=0;
+            checkConnect(row+1,col+1);
+        }
+        else if((row==0)&&(col==_N_w-1)){
+            _array_ptr[(row+1)*_N_w+col]=0;
+            _array_ptr[row*_N_w+col-1]=0;
+            checkConnect(row+1,col-1);
+        }
+        else if((row==_N_h-1)&&(col==0)){
+            _array_ptr[(row-1)*_N_w+col]=0;
+            _array_ptr[row*_N_w+col+1]=0;
+            checkConnect(row-1,col+1);
+        }
+        else if((row==_N_h-1)&&(col==_N_w-1)){
+            _array_ptr[(row-1)*_N_w+col]=0;
+            _array_ptr[row*_N_w+col-1]=0;
+            checkConnect(row-1,col-1);
+        }
+        else{
+            fillSolid(row,col);
+        }
+    }
+}
+
+void Channel::fillSolid(size_t row, size_t col){
+    if(((row>col)&&(row>_N_w-1-col))||((row<col)&&(row<_N_w-col))){
+        if ((row>0)&&(row<_N_h-1)){
+            _array_ptr[(row+1)*_N_w+col]=0;
+            _array_ptr[(row-1)*_N_w+col]=0;
+            checkConnect(row+1,col+1);
+            checkConnect(row+1,col-1);
+            checkConnect(row-1,col+1);
+            checkConnect(row-1,col-1);
+        }
+    }
+    else{
+        if((col>0)&&(col<_N_w-1)){
+            _array_ptr[row*_N_w+col-1]=0;
+            _array_ptr[row*_N_w+col+1]=0;
+            checkConnect(row+1,col+1);
+            checkConnect(row+1,col-1);
+            checkConnect(row-1,col+1);
+            checkConnect(row-1,col-1);
+        }
+    }
+
+    if (row==0){
+        _array_ptr[(row+1)*_N_w+col]=0;
+        checkConnect(row+1,col+1);
+        checkConnect(row+1,col-1);
+    }
+    else if (row==_N_h-1){
+        _array_ptr[(row-1)*_N_w+col]=0;
+        checkConnect(row-1,col+1);
+        checkConnect(row-1,col-1);
+    }
+
+    if(col==0){
+        _array_ptr[row*_N_w+col+1]=0;
+        checkConnect(row+1,col+1);
+        checkConnect(row-1,col+1);
+    }
+    else if(col==_N_w-1){
+        _array_ptr[row*_N_w+col-1]=0;
+        checkConnect(row+1,col-1);
+        checkConnect(row-1,col-1);
+    }
+}
+
+vector<int> Channel::chooseCell(const float* Tmap,int num){
+    int size=_N_h*_N_w;
+    node candidate[size];
+    vector<int> chosenCellIndex;
+    // judge whether size of Tmap is right
+ //   std::cout<<"sizeof(Tmap)/sizeof(Tmap[0]"<<sizeof(Tmap)/sizeof(Tmap[0]);
+    //assert(sizeof(Tmap)/sizeof(Tmap[0])==_N_h*_N_w);
+    for (size_t i=0;i<_N_h*_N_w;i++){
+        std::cout<<" "<<_array_ptr[i];
+    }
+    for(size_t i=0;i<_N_h*_N_w;i++){
+        candidate[i].temperature=Tmap[i];
+        std::cout<<candidate[i].temperature<<std::endl;
+
+        candidate[i].cell=_array_ptr[i];
+        std::cout<<candidate[i].cell<<std::endl;
+
+        candidate[i].mark=_array_mark[i];
+        candidate[i].index=i;
+    }
+    std::sort(candidate,candidate+_N_h*_N_w,compare);
+    std::cout<<"after sort:"<<std::endl;
+    for (size_t i=0;i<_N_h*_N_w;i++){
+        std::cout<<"candidate[i].temperature:"<<candidate[i].temperature<<"i: "<<candidate[i].index<<std::endl;
+
+    }
+
+    int chosenNum=0;
+    for (size_t i=0;i<_N_h*_N_w;i++){
+        if ((candidate[i].mark!=0)&&(candidate[i].cell!=0)){
+            chosenCellIndex.push_back(candidate[i].index);
+            chosenNum++;
+        }
+        if (chosenNum>=num)break;
+    }
+
+    return chosenCellIndex;
+}
+
+bool compare(node a, node b){
+    return a.temperature<b.temperature;
+}
+
+

@@ -9,7 +9,7 @@
   ==========================================================================
   ============================= File Info ==================================
 
-  Author: Hengliang Zhu
+  Author: Feng Hu
   
   Description:
 
@@ -34,12 +34,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <algorithm>
 #include "util.h"
+#include "Location.h"
 
 using std::vector;
 using std::stack;
 using std::ostream;
-
+using std::sort;
+using std::istream;
 /*! \class Channel
  *
  *  Channel: -1 = (fixed) tsv-region
@@ -48,21 +51,33 @@ using std::ostream;
              2  = channel inlet
              3  = channel outlet
  */
+
+typedef struct {
+    float temperature;
+    int cell;
+    int mark;
+    int index;
+}node;
+
 class Channel
 {
 public:
+  Channel(){}
   /// \brief construct function
   Channel(size_t N_h, size_t N_w, const char* channel_template_file)
-    : _N_h(N_h), _N_w(N_w), _array_ptr(NULL)
+    : _N_h(N_h), _N_w(N_w), _array_ptr(NULL),_array_mark(NULL)
   {
     read_from_file(N_h, N_w, channel_template_file);
   }
   /// \brief construct function
   Channel(size_t N_h, size_t N_w)
-    : _N_h(N_h), _N_w(N_w), _array_ptr(NULL)
+    : _N_h(N_h), _N_w(N_w), _array_ptr(NULL),_array_mark(NULL)
   {
     _array_ptr = new int[_N_h*_N_w];
     memset(_array_ptr, 0, _N_h*_N_w*sizeof(int));
+
+    _array_mark = new int[_N_h*_N_w];
+    memcpy(_array_mark, _array_ptr, _N_h*_N_w*sizeof(int));
   }
 
   /// \brief deconstruct function
@@ -71,6 +86,9 @@ public:
   {
     _array_ptr = new int[_N_h*_N_w];
     memcpy(_array_ptr, rhs._array_ptr, _N_h*_N_w*sizeof(int));
+
+    _array_mark = new int[_N_h*_N_w];
+    memcpy(_array_mark, rhs._array_mark, _N_h*_N_w*sizeof(int));
   }
 
   /// \brief deconstruct function
@@ -87,6 +105,12 @@ public:
       {
 	delete [] _array_ptr;
 	_array_ptr = NULL;
+      }
+
+    if (_array_mark!=NULL)
+      {
+    delete [] _array_mark;
+    _array_mark = NULL;
       }
   }
   /// \brief get channel pattern from file
@@ -163,11 +187,32 @@ public:
   /// \brief output
   friend ostream& operator<<(ostream& os, const Channel& rhs);
 
+  /// \brief get the total number of adjancent "1" "2" "3" cell number
+  int adjancentLiquidCellNumber(size_t row,size_t col);
+
+  /// \brief if one liquid cell has only one adjancent liquid cell, return the location of the adjancent cell
+  Location adjancentLiquidCellLocation(size_t row, size_t col);
+
+  /// \brief check connect by recursive
+  void checkConnect(size_t row, size_t col);
+
+  /// \brief fill channel cell
+  void fillChannel(size_t row,size_t col);
+
+  /// \brief fill channel cell near solid TSV
+  void fillSolid(size_t row, size_t col);
+
+  /// \brief choose cell
+  vector<int> chooseCell(const float *Tmap, int num);
+
+
 private:
   /// \brief number of grids 
   size_t _N_h, _N_w;
   /// \brief Channel array, fliud network template
   int *_array_ptr;
+  /// \brief channel mark array
+  int *_array_mark;
   
 }; // class Channel
 
@@ -186,5 +231,6 @@ inline ostream& operator<<(ostream& os, const Channel& rhs)
   return os;
 }
 
-
+/// \brief compare function
+bool compare(node a, node b);//{}
 #endif // _CHANNEL_H_

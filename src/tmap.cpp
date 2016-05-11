@@ -13,8 +13,8 @@ void Tmap::read_from_file(size_t N_h, size_t N_w,
                  const char* Tmap_template_file)
 {
   clear();
-  string line;
-  string delims(" \n\t\r");
+  std::string line;
+  std::string delims(" \n\t\r");
   _N_h = N_h;
   _N_w = N_w;
 
@@ -27,6 +27,11 @@ void Tmap::read_from_file(size_t N_h, size_t N_w,
   Tmap_file.open(Tmap_template_file);
   for (size_t i = 0; i < _N_h; i++) {
     getline(Tmap_file, line);
+    // remove comment, need to be more roburst
+    if (line[0]=='%'){
+      getline(Tmap_file, line);
+    }
+
     for (size_t j = 0; j < _N_w; j++) {
       _array_temperature[i*_N_w + j] = atof(tokenizer(line, delims).c_str());
     }
@@ -101,4 +106,31 @@ void Tmap::turnOverMatrix(){
                _array_temperature[(_N_h-1-i)*_N_w+j]=temp;
             }
         }
+}
+
+void Tmap::updateTmap(const char* Tmap_template_file){
+
+    std::string line;
+    std::string delims(" \n\t\r");
+
+    std::ifstream Tmap_file;
+    Tmap_file.open(Tmap_template_file);
+    for (size_t i = 0; i < _N_h; i++) {
+      getline(Tmap_file, line);
+      // remove comment, need to be more roburst
+      if (line[0]=='%'){
+        getline(Tmap_file, line);
+      }
+      for (size_t j = 0; j < _N_w; j++) {
+        _array_temperature[i*_N_w + j] = atof(tokenizer(line, delims).c_str());
+      }
+    }
+    //show
+    //for (size_t i = 0; i < _N_h; i++) {
+    //	  for (size_t j = 0; j < _N_w; j++) {
+    //		  std::cout << _array_temperature[i*_N_w + j] << " ";
+    //	  }
+    //	  std::cout << std::endl;
+    //  }
+    Tmap_file.close();
 }
