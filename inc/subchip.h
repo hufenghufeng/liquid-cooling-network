@@ -3,9 +3,14 @@
 
 #include "tmap.h"
 #include "Channel.h"
+#include "result.h"
+#include "configure.h"
 #include <vector>
+#include <algorithm>
+#include <math.h>
 
 using std::vector;
+using std::sort;
 
 class Subchip
 {
@@ -26,13 +31,27 @@ public:
        tempChannel=channel;
     }
 
+    void initialResult(float setCoolingEnergy);
+
+    void initialChannel(int index);
+
     void fillColdCell(size_t num);
     /// \brief you need to set the cooling enery and the where to read the Tmap file
     void generateTempTmap(float setCoolingEnergy);
 
+    void evaluateTempTmap();
+
+    void keepResult();
+
     float getCoolingEnergy();
 
-    void evaluateTempTmap();
+    float getPin();
+
+    void setPin(float pin);
+
+    /// \brief main function
+    void beginFilling();
+
 private:
     size_t _N_h;
     size_t _N_w;
@@ -44,6 +63,8 @@ private:
     Tmap tempTopTmap;
     Tmap tempBottomTmap;
     Channel tempChannel;
+    /// \brief result
+    Result resultHistory;
 };
 
 #endif // SUBCHIP_H

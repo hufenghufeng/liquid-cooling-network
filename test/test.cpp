@@ -14,6 +14,10 @@ int main(){
     cout<<"hello"<<endl;
     Channel testChannel(5,5,"channel.dat");
     cout<<testChannel<<endl;
+
+    ofstream fout;
+    fout.open("testChannelOutput.txt");
+    fout<<testChannel<<endl;
  /*   testChannel.fillChannel(1,1);
     cout<<testChannel<<endl;
     testChannel.fillChannel(3,0);

@@ -3,13 +3,20 @@
 
 #include <vector>
 #include <stdlib.h>
+#include <fstream>
+#include <iostream>
+#include <string.h>
+
 using std::vector;
-class result
+using std::fstream;
+using std::ostream;
+
+class Result
 {
 public:
-    result();
+    Result();
 
-    ~result(){
+    ~Result(){
         clear();
     }
 
@@ -20,10 +27,75 @@ public:
         }
     }
 
+        void initialBestChannel(size_t rowSize, size_t colSize);
+
+    void setBestChannel(size_t rowSize, size_t colSize,int* channel);
+
+    void outputResult();
+
+        friend ostream& operator<<(ostream& os, const Result& rhs);
+
+    float getLastDeltaT(){
+        return dT.at(dT.size()-1);
+    }
+
+         void setBestPressure(float pressure){
+            bestPressure=pressure;
+         }
+
+         float getBestPressure(){
+             return bestPressure;
+         }
+
+         void setBestTmax(float Tmax){
+                bestTmax=Tmax;
+         }
+
+         float getBestTmax(){
+             return bestTmax;
+         }
+
+         void setBestDeltaT(float deltaT){
+             bestDeltaT=deltaT;
+         }
+
+         float getBestDeltaT(){
+             return bestDeltaT;
+         }
+
+         void setBestStep(int step){
+             bestStep=step;
+         }
+
+         int getBestStep(){
+                return bestStep;
+         }
+
+    void addPressure(float Pin){
+        pressure.push_back(Pin);
+    }
+
+    void addMaxT(float Tmax){
+        maxT.push_back(Tmax);
+    }
+
+    void addDTTop(float dtTop){
+        dTTop.push_back(dtTop);
+    }
+
+    void addDTBottom(float dtBottom){
+        dTBottom.push_back(dtBottom);
+    }
+
+    void addDT(float dt){
+        dT.push_back(dt);
+    }
+
 private:
     vector<float> pressure;
     vector<float> maxT;
-    vector<float> minT;
+    vector<float> dTTop;
+    vector<float> dTBottom;
     vector<float> dT;
 
     float bestPressure;
@@ -32,6 +104,8 @@ private:
     int   bestStep;
 
     int* bestChannel;
+    size_t _N_h;
+    size_t _N_w;
 };
 
 #endif // RESULT_H

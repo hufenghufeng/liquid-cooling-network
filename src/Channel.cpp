@@ -350,21 +350,142 @@ vector<int> Channel::chooseCell(const float* Tmap,int num){
         std::cout<<"candidate[i].temperature:"<<candidate[i].temperature<<"i: "<<candidate[i].index<<std::endl;
 
     }
-
+    //choose and mark
     int chosenNum=0;
     for (size_t i=0;i<_N_h*_N_w;i++){
         if ((candidate[i].mark!=0)&&(candidate[i].cell!=0)){
             chosenCellIndex.push_back(candidate[i].index);
+            markCell(candidate[i].index);
             chosenNum++;
         }
         if (chosenNum>=num)break;
     }
 
+
     return chosenCellIndex;
+}
+
+void Channel::markCell(int index)
+{
+    _array_mark[index]=0;
 }
 
 bool compare(node a, node b){
     return a.temperature<b.temperature;
 }
 
+void Channel::initialChannel(int index){
 
+    // fill all 1
+    for(int i=1;i<_N_h-1;i++){
+        for(int j=1;j<_N_w;j++){
+            _array_ptr[i*_N_w+j]=1;
+        }
+    }
+    // fill all -1
+    for(int i=0;i<_N_h;i=i+2){
+        for(int j=0;j<_N_w;j=j+2){
+            _array_ptr[i*_N_w+j]=-1;
+        }
+    }
+
+    switch(index){
+    // case1 212
+    case 1:
+        for(int i=1;i<_N_h-1;i=i+2){
+            _array_ptr[0*_N_w+i]=3;
+            _array_ptr[i*_N_w+0]=2;
+            _array_ptr[i*_N_w+_N_w-1]=3;
+            _array_ptr[(_N_h-1)*_N_w+i]=2;
+        }
+        for(int i=1;i<(_N_w-1)/2;i=i+2){
+            _array_ptr[0*_N_w+i]=2;
+            _array_ptr[0*_N_w+(_N_w-1)/2+i]=3;
+            _array_ptr[i*_N_w+0]=3;
+            _array_ptr[(_N_w-1)/2+i*_N_w+0]=2;
+
+            _array_ptr[(_N_h-1)*_N_w+i]=3;
+            _array_ptr[(_N_h-1)*_N_w+(_N_w-1)/2+i]=2;
+            _array_ptr[i*_N_w+(_N_h-1)]=2;
+            _array_ptr[(_N_w-1)/2+i*_N_w+(_N_h-1)]=3;
+        }
+
+        for(int i=1;i<_N_h-1;i=i+2){
+            _array_ptr[i*_N_w+(_N_h-1)/2]=0;
+            _array_ptr[(_N_h-1)/2*_N_w+i]=0;
+        }
+
+        drawLine(99,1 ,99-26*cos(0.3 ),1+26*sin(0.3));
+        drawLine(1 ,1 ,1 +31*cos(0.22),1+31*sin(0.22));
+        drawLine(99,99,99-30*cos(0.2),99-30*sin(0.2));
+        drawLine(1 ,99,1 +37*cos(0.24),99-37*sin(0.24));
+
+        break;
+    }
+}
+
+void Channel::drawLine(int x1, int y1, int x2, int y2){
+    assert (x1>=0&&x1<_N_w);
+    assert (x2>=0&&x2<_N_w);
+    assert (y1>=0&&y1<_N_h);
+    assert (y2>=0&&y2<_N_h);
+
+    float k;
+
+    if(x1!=x2){
+        k=(y2-y1)/(x2-x1);
+        if(x2<x1){
+            for(int i=x1;i<=x2;i--){
+                if(y2>y1){
+                    for(int j=round(k*(i-x1)+y1);j<=round(k*(i-1-x1)+y1);j++){
+                      if(_array_ptr[i*_N_w+j]!=-1){
+                        fillChannel(i,j);
+                      }
+                    }
+                }
+                else{
+                    for(int j=round(k*(i-x1)+y1);j>=round(k*(i-1-x1)+y1);j--){
+                      if(_array_ptr[i*_N_w+j]!=-1){
+                        fillChannel(i,j);
+                      }
+                    }
+                }
+            }
+        }
+        else{
+            for(int i=x1;i<x2;i++){
+                if(y2>y1){
+                    for(int j=round(k*(i-x1)+y1);j<=round(k*(i+1-x1)+y1);j++){
+                        if(_array_ptr[i*_N_w+j]!=-1){
+                          fillChannel(i,j);
+                        }
+                    }
+                }
+                else{
+                    for(int j=round(k*(i-x1)+y1);j>=round(k*(i+1-x1)+y1);j--){
+                        if(_array_ptr[i*_N_w+j]!=-1){
+                          fillChannel(i,j);
+                        }
+                    }
+                }
+            }
+
+       }
+    }
+    else{
+        if(y1<y2){
+            for(int i=y1;i<=y2;i++){
+                if(_array_ptr[x1*_N_w+i]!=-1){
+                  fillChannel(x1,i);
+                }
+            }
+        }
+        else{
+            for(int i=y1;i>=y2;i--){
+                if(_array_ptr[x1*_N_w+i]!=-1){
+                  fillChannel(x1,i);
+                }
+            }
+        }
+    }
+}

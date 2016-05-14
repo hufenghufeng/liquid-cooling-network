@@ -132,5 +132,9 @@ void Tmap::updateTmap(const char* Tmap_template_file){
     //	  }
     //	  std::cout << std::endl;
     //  }
+
+    caculateTmap();
+    // waiting to be done: turnoverMatrix while reading
+    turnOverMatrix();
     Tmap_file.close();
 }

@@ -185,6 +185,9 @@ public:
   void correct();
 
   /// \brief output
+  friend ostream& operator<(ostream& os, const Channel& rhs);
+
+  /// \brief output to file, these two function can be combined, do it later
   friend ostream& operator<<(ostream& os, const Channel& rhs);
 
   /// \brief get the total number of adjancent "1" "2" "3" cell number
@@ -202,9 +205,22 @@ public:
   /// \brief fill channel cell near solid TSV
   void fillSolid(size_t row, size_t col);
 
-  /// \brief choose cell
+  /// \brief choose and mark cell
   vector<int> chooseCell(const float *Tmap, int num);
+  
+  /// \brief after choose cell, you must mark this cell
+  void markCell(int index);
 
+  /// \brief return channel
+  int* getChannel(){
+      return _array_ptr;
+  }
+
+  /// \brief initial Channel and mark
+  void initialChannel(int index);
+
+    /// \brief draw line in channel
+    void drawLine(int x1, int y1, int x2, int y2);
 
 private:
   /// \brief number of grids 
@@ -216,7 +232,7 @@ private:
   
 }; // class Channel
 
-inline ostream& operator<<(ostream& os, const Channel& rhs)
+inline ostream& operator<(ostream& os, const Channel& rhs)
 {
   os<<"Channel: "<<rhs.Nh()<<" * "<<rhs.Nw()<<std::endl;
   os<<" [ ";
@@ -227,6 +243,20 @@ inline ostream& operator<<(ostream& os, const Channel& rhs)
       if (i+1<rhs.Nh())
 	os<<"; ";// <<std::endl;
       else os<<"] "<<std::endl;
+    }
+  return os;
+}
+
+inline ostream& operator<<(ostream& os, const Channel& rhs)
+{
+  for (size_t i=0;i<rhs.Nh();++i)
+    {
+      for (size_t j=0;j<rhs.Nw();++j){
+         os<<rhs(i,j)<<" ";
+         if(j==(rhs.Nw()-1)){
+             os<<std::endl;
+         }
+      }
     }
   return os;
 }
