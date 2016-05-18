@@ -2,7 +2,9 @@
 #include <iostream>
 #include "Channel.h"
 #include "Location.h"
+#include "subchip.h"
 #include "tmap.h"
+#include "util.h"
 using namespace std;
 
 int main(){
@@ -25,11 +27,32 @@ int main(){
     testChannel.fillChannel(4,0);
     cout<<testChannel<<endl;*/
 
-    Tmap tmap(5,5,"Tmap.dat");
+/*    Tmap tmap(5,5,"Tmap.dat");
     cout<<"Tmax:"<<tmap.getTmax()<<" Tmin:"<<tmap.getTmin()<<endl;
     cout<<tmap;
     vector<int> cell;
     cell=testChannel.chooseCell(tmap.getTmap(),1);
-    cout<<"fill:"<<cell.at(0);
+    cout<<"fill:"<<cell.at(0);*/
+
+
+    std::ifstream fin;
+    std::string line;
+    float coolingEnergy;
+    fin.open("/home/hf/new-ice/bin/cooling_energy.dat");
+
+    if(!fin){
+  //      cerr<<"open cooling energy file ERROR!"<<std::endl;
+    }
+    getline(fin,line);
+    coolingEnergy=atof(line.c_str());
+
+    fin.close();
+
+    std::cout<<coolingEnergy;
+
+    Subchip chip=Subchip(101,101,"/home/hf/new-ice/bin/output1.txt","/home/hf/new-ice/bin/output2.txt","/home/hf/new-ice/bin/case1/test_case_01.stk");
+
+    chip.beginFilling();
+
     return 0;
 }

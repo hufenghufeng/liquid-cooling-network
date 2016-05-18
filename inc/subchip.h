@@ -8,8 +8,10 @@
 #include <vector>
 #include <algorithm>
 #include <math.h>
+#include <string.h>
 
 using std::vector;
+using std::string;
 using std::sort;
 
 class Subchip
@@ -24,11 +26,15 @@ public:
 
          topLayer=Tmap(N_h,N_w,topTmapFile);
          bottomLayer=Tmap(N_h,N_w,bottomTmapFile);
-         Channel channel(N_h,N_w,channelFile);
+         channel=Channel(N_h,N_w,channelFile);
 
         tempTopTmap=topLayer;
         tempBottomTmap=bottomLayer;
        tempChannel=channel;
+    }
+
+    void config(const string caseName, int Steps, int channelIndex){
+         myconfig=configure(caseName,Steps,channelIndex);
     }
 
     void initialResult(float setCoolingEnergy);
@@ -39,7 +45,7 @@ public:
     /// \brief you need to set the cooling enery and the where to read the Tmap file
     void generateTempTmap(float setCoolingEnergy);
 
-    void evaluateTempTmap();
+    void evaluateTempTmap(int index);
 
     void keepResult();
 
@@ -65,6 +71,8 @@ private:
     Channel tempChannel;
     /// \brief result
     Result resultHistory;
+
+    configure myconfig;
 };
 
 #endif // SUBCHIP_H

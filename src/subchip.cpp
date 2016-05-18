@@ -45,11 +45,12 @@ void Subchip::generateTempTmap(float setCoolingEnergy){
     tempTopTmap.updateTmap("~/new-ice/bin/output1.txt");
     tempBottomTmap.updateTmap("~/new-ice/bin/output2.txt");
 
+    resultHistory.setTempPin(setpin);
 }
 
 
 
-void Subchip::evaluateTempTmap(){
+void Subchip::evaluateTempTmap(int index){
 
     float TmaxConstraints=360.0;
     tempTopTmap.caculateTmap();
@@ -66,10 +67,21 @@ void Subchip::evaluateTempTmap(){
         bottomLayer=tempBottomTmap;
         channel    =tempChannel;
 
+        resultHistory.addPressure(resultHistory.getTempPin());
+        resultHistory.addMaxT(Tmax);
+        resultHistory.addDT(dTmax);
+        resultHistory.addDTTop(dTtop);
+        resultHistory.addDTBottom(dTbottom);
 
+        resultHistory.setBestChannel(_N_h,_N_w,tempChannel.getChannel());
+        resultHistory.setBestDeltaT(dTmax);
+        resultHistory.setBestPressure(resultHistory.getTempPin());
+        resultHistory.setBestTmax(Tmax);
+        resultHistory.setBestStep(index);
     }
     else{
         //refuse
+        resultHistory.copyLastResult();
     }
 
 }
@@ -138,14 +150,19 @@ void Subchip::setPin(float Pin){
 }
 
 void Subchip::beginFilling(){
-    initialChannel();
-    generateTempTmap();
-    initialResult();
-    for(int i=2;i<configure.totalFillStep();i++){
+    config("case1",10,1);
+    initialChannel(1);
+    generateTempTmap(0.001);
+    initialResult(0.001);
+    for(int i=2;i<myconfig.totalFillStep();i++){
         fillColdCell(1);
-        generateTempTmap();
-        evaluateTempTmap();
-        keepResult();
+        generateTempTmap(0.001);
+        evaluateTempTmap(i);
+        //keepResult();
     }
     resultHistory.outputResult();
+}
+
+void Subchip::initialChannel(int index){
+    channel.initialChannel(index);
 }

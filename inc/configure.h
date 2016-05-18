@@ -9,6 +9,8 @@ class configure
 public:
     configure();
 
+    configure(std::string casename, int steps, int channelIndex);
+
     int totalFillStep(){
         return totalStep;
     }

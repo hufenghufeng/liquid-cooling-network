@@ -14,7 +14,7 @@ using std::ostream;
 class Result
 {
 public:
-    Result();
+    Result(){};
 
     ~Result(){
         clear();
@@ -91,6 +91,22 @@ public:
         dT.push_back(dt);
     }
 
+    void setTempPin(float p){
+        tempPin=p;
+    }
+
+    float getTempPin(){
+        return tempPin;
+    }
+
+    void copyLastResult(){
+        pressure.push_back(pressure.at(pressure.size()-1));
+        maxT.push_back(maxT.at(maxT.size()-1));
+        dTTop.push_back(dTTop.at(dTTop.size()-1));
+        dTBottom.push_back(dTBottom.at(dTBottom.size()-1));
+        dT.push_back(dT.at(dT.size()-1));
+    }
+
 private:
     vector<float> pressure;
     vector<float> maxT;
@@ -102,6 +118,8 @@ private:
     float bestTmax;
     float bestDeltaT;
     int   bestStep;
+
+    float tempPin;
 
     int* bestChannel;
     size_t _N_h;
