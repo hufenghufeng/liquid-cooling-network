@@ -155,7 +155,7 @@ int Channel::adjancentLiquidCellNumber(size_t row, size_t col){
             number++;
         }
     }
-    if (row<_N_w){
+    if (row<_N_w-1){
         if(_array_ptr[(row+1)*_N_w+col]>0){
             number++;
         }
@@ -165,7 +165,7 @@ int Channel::adjancentLiquidCellNumber(size_t row, size_t col){
             number++;
         }
     }
-    if(col<_N_h){
+    if(col<_N_h-1){
         if(_array_ptr[row*_N_w+col+1]>0){
             number++;
         }
@@ -324,43 +324,63 @@ void Channel::fillSolid(size_t row, size_t col){
     }
 }
 
-vector<int> Channel::chooseCell(const float* Tmap,int num){
+std::vector<int> Channel::chooseCell(const float* Tmap,int num){
     int size=_N_h*_N_w;
     node candidate[size];
-    vector<int> chosenCellIndex;
+    std::vector<int> chosenCellIndex;
     // judge whether size of Tmap is right
  //   std::cout<<"sizeof(Tmap)/sizeof(Tmap[0]"<<sizeof(Tmap)/sizeof(Tmap[0]);
     //assert(sizeof(Tmap)/sizeof(Tmap[0])==_N_h*_N_w);
-    for (size_t i=0;i<_N_h*_N_w;i++){
-        std::cout<<" "<<_array_ptr[i];
-    }
+//    for (size_t i=0;i<_N_h*_N_w;i++){
+//        std::cout<<" "<<_array_ptr[i];
+//    }
     for(size_t i=0;i<_N_h*_N_w;i++){
         candidate[i].temperature=Tmap[i];
-        std::cout<<candidate[i].temperature<<std::endl;
+        //std::cout<<candidate[i].temperature<<std::endl;
 
         candidate[i].cell=_array_ptr[i];
-        std::cout<<candidate[i].cell<<std::endl;
+        //std::cout<<candidate[i].cell<<std::endl;
 
         candidate[i].mark=_array_mark[i];
         candidate[i].index=i;
     }
     std::sort(candidate,candidate+_N_h*_N_w,compare);
-    std::cout<<"after sort:"<<std::endl;
+/*    std::cout<<"after sort:"<<std::endl;
     for (size_t i=0;i<_N_h*_N_w;i++){
         std::cout<<"candidate[i].temperature:"<<candidate[i].temperature<<"i: "<<candidate[i].index<<std::endl;
 
-    }
+    }*/
     //choose and mark
     int chosenNum=0;
+//    int number=0;
     for (size_t i=0;i<_N_h*_N_w;i++){
+//    for (size_t i=0;i<_N_h*_N_w;i++){
+        /*
+        for(size_t i=0;i<_N_h*_N_w;i++){
+            if (candidate[i].mark==0)number++;
+        }
+        std::cout<<"number of 0 marks:"<<number;
+        number=0;
+        for(size_t i=0;i<_N_h*_N_w;i++){
+            if (candidate[i].cell==0)number++;
+        }
+        std::cout<<"number of 0 cells:"<<number;
+        number=0;
+        */
         if ((candidate[i].mark!=0)&&(candidate[i].cell!=0)){
             chosenCellIndex.push_back(candidate[i].index);
+            std::cout<<"choose index from Tmap:"<<candidate[i].index<<std::endl;
             markCell(candidate[i].index);
             chosenNum++;
         }
         if (chosenNum>=num)break;
     }
-
+    std::cout<<"lenght of chosenCellIndex"<<chosenCellIndex.size()<<std::endl;
+    for(vector<int>::iterator iter=chosenCellIndex.begin();
+                              iter!=chosenCellIndex.end();
+                              iter++){
+        std::cout<<"chosen cell"<<(*iter)<<std::endl;
+    }
 
     return chosenCellIndex;
 }
@@ -375,30 +395,37 @@ bool compare(node a, node b){
 }
 
 void Channel::initialChannel(int index){
-
+    std::ofstream fouttttt;
+    fouttttt.open("beforefill1");
+    fouttttt<<(*this);
     // fill all 1
-    for(int i=1;i<_N_h-1;i++){
-        for(int j=1;j<_N_w;j++){
-            _array_ptr[i*_N_w+j]=1;
+    for(int i=0;i<101;i++){
+        for(int j=0;j<101;j++){
+            _array_ptr[i*101+j]=1;
         }
     }
+    std::ofstream foutttt;
+    foutttt.open("beforefill-1");
+    foutttt<<(*this);
     // fill all -1
-    for(int i=0;i<_N_h;i=i+2){
-        for(int j=0;j<_N_w;j=j+2){
+    for(size_t i=0;i<_N_h;i=i+2){
+        for(size_t j=0;j<_N_w;j=j+2){
             _array_ptr[i*_N_w+j]=-1;
         }
     }
-
+    std::ofstream fouttt;
+    fouttt.open("beforeSwitch");
+    fouttt<<(*this);
     switch(index){
     // case1 212
     case 1:
-        for(int i=1;i<_N_h-1;i=i+2){
+        for(size_t i=1;i<_N_h-1;i=i+2){
             _array_ptr[0*_N_w+i]=3;
             _array_ptr[i*_N_w+0]=2;
             _array_ptr[i*_N_w+_N_w-1]=3;
             _array_ptr[(_N_h-1)*_N_w+i]=2;
         }
-        for(int i=1;i<(_N_w-1)/2;i=i+2){
+        for(size_t i=1;i<(_N_w-1)/2;i=i+2){
             _array_ptr[0*_N_w+i]=2;
             _array_ptr[0*_N_w+(_N_w-1)/2+i]=3;
             _array_ptr[i*_N_w+0]=3;
@@ -410,25 +437,31 @@ void Channel::initialChannel(int index){
             _array_ptr[(_N_w-1)/2+i*_N_w+(_N_h-1)]=3;
         }
 
-        for(int i=1;i<_N_h-1;i=i+2){
+        for(size_t i=2;i<_N_h;i=i+2){
+            _array_ptr[i*_N_w+(_N_h-1)/2-1]=1;
+        }
+        for(size_t i=1;i<_N_h-1;i=i+2){
             _array_ptr[i*_N_w+(_N_h-1)/2]=0;
             _array_ptr[(_N_h-1)/2*_N_w+i]=0;
         }
-
-        drawLine(99,1 ,99-26*cos(0.3 ),1+26*sin(0.3));
-        drawLine(1 ,1 ,1 +31*cos(0.22),1+31*sin(0.22));
-        drawLine(99,99,99-30*cos(0.2),99-30*sin(0.2));
-        drawLine(1 ,99,1 +37*cos(0.24),99-37*sin(0.24));
+        std::ofstream foutt;
+        foutt.open("beforeDrawLine");
+        foutt<<(*this);
+//        drawLine(99,1 ,99-26*cos(0.3 ),1+26*sin(0.3));
+//        drawLine(1 ,1 ,1 +31*cos(0.22),1+31*sin(0.22));
+//        drawLine(99,99,99-30*cos(0.2),99-30*sin(0.2));
+//        drawLine(1 ,99,1 +37*cos(0.24),99-37*sin(0.24));
 
         break;
     }
+    memcpy(_array_mark, _array_ptr, _N_h*_N_w*sizeof(int));
 }
 
 void Channel::drawLine(int x1, int y1, int x2, int y2){
-    assert (x1>=0&&x1<_N_w);
-    assert (x2>=0&&x2<_N_w);
-    assert (y1>=0&&y1<_N_h);
-    assert (y2>=0&&y2<_N_h);
+    assert (x1>=0&&x1<(int)_N_w);
+    assert (x2>=0&&x2<(int)_N_w);
+    assert (y1>=0&&y1<(int)_N_h);
+    assert (y2>=0&&y2<(int)_N_h);
 
     float k;
 

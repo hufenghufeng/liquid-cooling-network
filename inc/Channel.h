@@ -62,22 +62,47 @@ typedef struct {
 class Channel
 {
 public:
-  Channel(){}
+  Channel(){
+      _array_ptr = new int[101*101];
+      memset(_array_ptr, 0, 101*101*sizeof(int));
+
+      _array_mark = new int[101*101];
+      memcpy(_array_mark, _array_ptr, 101*101*sizeof(int));
+  }
   /// \brief construct function
   Channel(size_t N_h, size_t N_w, const char* channel_template_file)
     : _N_h(N_h), _N_w(N_w), _array_ptr(NULL),_array_mark(NULL)
   {
     read_from_file(N_h, N_w, channel_template_file);
+    _array_mark = new int[101*101];
+    memcpy(_array_mark, _array_ptr, 101*101*sizeof(int));
   }
   /// \brief construct function
   Channel(size_t N_h, size_t N_w)
-    : _N_h(N_h), _N_w(N_w), _array_ptr(NULL),_array_mark(NULL)
   {
+      _N_h=N_h;
+      _N_w=N_w;
     _array_ptr = new int[_N_h*_N_w];
-    memset(_array_ptr, 0, _N_h*_N_w*sizeof(int));
+    memset(_array_ptr, 0.0, _N_h*_N_w*sizeof(int));
 
     _array_mark = new int[_N_h*_N_w];
     memcpy(_array_mark, _array_ptr, _N_h*_N_w*sizeof(int));
+
+    std::ofstream debug_channel1;
+    debug_channel1.open("afterChannel.dat");
+    debug_channel1<<(*this);
+  }
+
+  Channel operator =(const Channel& rhs){
+        _N_h=rhs._N_h;
+        _N_w=rhs._N_w;
+//        memcpy(_array_ptr, rhs._array_ptr, _N_h*_N_w*sizeof(int));
+//        memcpy(_array_mark, _array_ptr, _N_h*_N_w*sizeof(int));
+        for (size_t i=0;i<_N_h*_N_w;i++){
+            _array_ptr[i]=rhs._array_ptr[i];
+            _array_mark[i]=rhs._array_mark[i];
+        }
+        return (*this);
   }
 
   /// \brief deconstruct function
@@ -99,8 +124,8 @@ public:
 
   /// \brief clear
   void clear() {
-    _N_h = 0;
-    _N_w = 0;
+//    _N_h = 0;
+//    _N_w = 0;
     if (_array_ptr!=NULL)
       {
 	delete [] _array_ptr;

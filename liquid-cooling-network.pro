@@ -5,7 +5,7 @@
 TEMPLATE = app
 TARGET = liquid-cooling-network
 INCLUDEPATH += . inc
-
+CONFIG += debug
 # Input
 HEADERS +=inc/Channel.h \
     inc/util.h \

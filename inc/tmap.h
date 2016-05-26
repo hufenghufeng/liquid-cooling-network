@@ -1,21 +1,37 @@
 #ifndef TMAP_H
 #define TMAP_H
 
-#include <iostream>
+//#include <iostream>
+#include <ostream>
+//#include <ifstream>
+//#include <ofstream>
 #include <fstream>
+//#include <sstream>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+
 #include "util.h"
 
 using std::string;
 using std::ostream;
 using std::fstream;
+//using std::ifstream;
+//using std::sstream;
+//using namespace std;
 
 class Tmap
 {
 public:
-    Tmap();
+    Tmap(){
+        _array_temperature = new float[101*101];
+        memset(_array_temperature, 0, 101*101*sizeof(float));
+        Tmax=0.0;
+        Tmin=0.0;
+        deltaT=0.0;
+//        caculateTmap();
+    }
+
     /// \brief construct function
     Tmap(size_t N_h, size_t N_w, const char* Tmap_template_file)
       : _N_h(N_h), _N_w(N_w), _array_temperature(NULL)
@@ -48,6 +64,19 @@ public:
       deltaT=Tmax-Tmin;
     }
 
+    Tmap operator =(const Tmap& rhs){
+        _N_h=rhs._N_h;
+        _N_w=rhs._N_w;
+        Tmax=rhs.Tmax;
+        Tmin=rhs.Tmin;
+        deltaT=rhs.deltaT;
+//        memcpy(_array_temperature, rhs._array_temperature, _N_h*_N_w*sizeof(float));
+        for(size_t i=0;i<_N_h*_N_w;i++){
+            _array_temperature[i]=rhs._array_temperature[i];
+        }
+        return (*this);
+    }
+
     /// \brief deconstruct function
     ~Tmap()
     {
@@ -56,8 +85,8 @@ public:
 
     /// \brief clear
     void clear() {
-      _N_h = 0;
-      _N_w = 0;
+//      _N_h = 0;
+//      _N_w = 0;
       if (_array_temperature!=NULL)
         {
       delete [] _array_temperature;
@@ -106,7 +135,7 @@ public:
     void caculateTmap();
 
     /// \brief update Tmap
-    void updateTmap(const char* Tmap_template_file);
+    void updateTmap(const char *Tmap_template_file);
 
     /// \brief turn over matrix
     void turnOverMatrix();
