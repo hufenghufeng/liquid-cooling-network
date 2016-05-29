@@ -48,7 +48,7 @@ void Subchip::generateTempTmap(float setCoolingEnergy){
 
     writeChannel<<tempChannel;
     writeChannel.close();
-
+    setPin(testPin);
     system("/home/hf/new-ice/bin/do_simulate.sh");
 
     float testCoolingEnenrgy=getCoolingEnergy();
@@ -80,7 +80,8 @@ void Subchip::evaluateTempTmap(int index){
     float dTbottom=tempBottomTmap.getDeltaT();
     float dTmax=std::max(dTtop,dTbottom);
 
-    if ((Tmax<TmaxConstraints)&&(dTmax<resultHistory.getLastDeltaT())){
+    if ((dTmax<resultHistory.getLastDeltaT())){
+//    if ((Tmax<TmaxConstraints)&&(dTmax<resultHistory.getLastDeltaT())){
         //accept
         std::cout<<"accept!"<<std::endl;
         topLayer   =tempTopTmap;
@@ -104,7 +105,6 @@ void Subchip::evaluateTempTmap(int index){
         std::cout<<"rejected!"<<std::endl;
         resultHistory.copyLastResult();
     }
-
 }
 
 void Subchip::initialResult(float setCoolingEnergy){

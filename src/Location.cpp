@@ -15,7 +15,7 @@ Location::Location(const Location &rhs){
     col=rhs.col;
 }
 
-Location Location::operator=(const Location& rhs){
+Location& Location::operator=(const Location& rhs){
     row=rhs.row;
     col=rhs.col;
 

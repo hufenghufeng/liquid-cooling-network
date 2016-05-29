@@ -5,7 +5,7 @@ public:
     Location();
     Location(int row,int col);
     Location(const Location& rhs);
-    Location operator=(const Location& rhs);
+    Location& operator=(const Location& rhs);
 
     void setRow(int r){
         row=r;
