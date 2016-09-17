@@ -2,7 +2,7 @@
 #define SUBCHIP_H
 
 #include "tmap.h"
-#include "Channel.h"
+#include "mchannel.h"
 #include "result.h"
 #include "configure.h"
 #include <vector>
@@ -32,8 +32,8 @@ public:
           tempTopTmap=Tmap(N_h,N_w,topTmapFile);
           tempBottomTmap=Tmap(N_h,N_w,bottomTmapFile);
 
-          channel=Channel(N_h,N_w);
-          tempChannel=Channel(N_h,N_w);
+          channel=mchannel(N_h,N_w);
+          tempChannel=mchannel(N_h,N_w);
 
          std::ofstream debug_channel1;
          debug_channel1.open("afterCreateChannel.dat");
@@ -69,11 +69,11 @@ public:
     /// \brief main function
     void beginFilling();
 
-    Channel getChannel(){
+    mchannel getChannel(){
         return channel;
     }
 
-    Channel getTempChannel(){
+    mchannel getTempChannel(){
         return tempChannel;
     }
 
@@ -83,11 +83,11 @@ private:
 
     Tmap topLayer;
     Tmap bottomLayer;
-    Channel channel;
+    mchannel channel;
     /// \brief temp data
     Tmap tempTopTmap;
     Tmap tempBottomTmap;
-    Channel tempChannel;
+    mchannel tempChannel;
     /// \brief result
     Result resultHistory;
 

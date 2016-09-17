@@ -1,6 +1,6 @@
-#include "Channel.h"
+#include "mchannel.h"
 
-void Channel::read_from_file(size_t N_h, size_t N_w, 
+void mchannel::read_from_file(size_t N_h, size_t N_w,
 			     const char* channel_template_file)
 {
   clear();
@@ -35,7 +35,7 @@ void Channel::read_from_file(size_t N_h, size_t N_w,
   memcpy(_array_mark, _array_ptr, _N_h*_N_w*sizeof(int));
 }
 
-void Channel::correct()
+void mchannel::correct()
 {
   size_t cur_index, nei_index;
   assert((_N_h>0)&&(_N_w>0));
@@ -148,7 +148,7 @@ void Channel::correct()
 
 }
 
-int Channel::adjancentLiquidCellNumber(size_t row, size_t col){
+int mchannel::adjancentLiquidCellNumber(size_t row, size_t col){
     int number=0;
     if (row>0){
         if(_array_ptr[(row-1)*_N_w+col]>0){
@@ -173,7 +173,7 @@ int Channel::adjancentLiquidCellNumber(size_t row, size_t col){
     return number;
 }
 
-Location Channel::adjancentLiquidCellLocation(size_t row, size_t col){
+Location mchannel::adjancentLiquidCellLocation(size_t row, size_t col){
 
     int location_r=0;
     int location_c=0;
@@ -211,7 +211,7 @@ Location Channel::adjancentLiquidCellLocation(size_t row, size_t col){
     return location;
 }
 
-void Channel::checkConnect(size_t row, size_t col){
+void mchannel::checkConnect(size_t row, size_t col){
     if (_array_ptr[row*_N_w+col]>0){
         if (adjancentLiquidCellNumber(row,col)==0){
             _array_ptr[row*_N_w+col]=0;
@@ -225,7 +225,7 @@ void Channel::checkConnect(size_t row, size_t col){
     }
 }
 
-void Channel::fillChannel(size_t row, size_t col){
+void mchannel::fillChannel(size_t row, size_t col){
 
     if(_array_ptr[row*_N_w+col]!=-1){
         if((row>0)&&(row<_N_h-1)&&(col>0)&&(col<_N_w-1)){
@@ -279,7 +279,7 @@ void Channel::fillChannel(size_t row, size_t col){
     }
 }
 
-void Channel::fillSolid(size_t row, size_t col){
+void mchannel::fillSolid(size_t row, size_t col){
     if(((row>col)&&(row>_N_w-1-col))||((row<col)&&(row<_N_w-col))){
         if ((row>0)&&(row<_N_h-1)){
             _array_ptr[(row+1)*_N_w+col]=0;
@@ -324,7 +324,7 @@ void Channel::fillSolid(size_t row, size_t col){
     }
 }
 
-std::vector<int> Channel::chooseCell(const float* Tmap,int num){
+std::vector<int> mchannel::chooseCell(const float* Tmap,int num){
     int size=_N_h*_N_w;
     node candidate[size];
     std::vector<int> chosenCellIndex;
@@ -385,7 +385,7 @@ std::vector<int> Channel::chooseCell(const float* Tmap,int num){
     return chosenCellIndex;
 }
 
-void Channel::markCell(int index)
+void mchannel::markCell(int index)
 {
     _array_mark[index]=0;
 }
@@ -394,7 +394,7 @@ bool compare(node a, node b){
     return a.temperature<b.temperature;
 }
 
-void Channel::initialChannel(int index){
+void mchannel::initialChannel(int index){
     std::ofstream fouttttt;
     fouttttt.open("beforefill1");
     fouttttt<<(*this);
@@ -457,7 +457,7 @@ void Channel::initialChannel(int index){
     memcpy(_array_mark, _array_ptr, _N_h*_N_w*sizeof(int));
 }
 
-void Channel::drawLine(int x1, int y1, int x2, int y2){
+void mchannel::drawLine(int x1, int y1, int x2, int y2){
     assert (x1>=0&&x1<(int)_N_w);
     assert (x2>=0&&x2<(int)_N_w);
     assert (y1>=0&&y1<(int)_N_h);

@@ -1,0 +1,4 @@
+#ifndef MULTILAYRESULT_H
+#define MULTILAYRESULT_H
+
+#endif // MULTILAYRESULT_H

@@ -22,8 +22,8 @@
   ==========================================================================
 */
 
-#ifndef _CHANNEL_H_
-#define _CHANNEL_H_
+#ifndef _MCHANNEL_H_
+#define _MCHANNEL_H_
 
 #include <iostream>
 #include <vector>
@@ -36,20 +36,19 @@
 #include <assert.h>
 #include <algorithm>
 #include "util.h"
-#include "Location.h"
 
 using std::vector;
 using std::stack;
 using std::ostream;
 using std::sort;
 using std::istream;
-/*! \class Channel
+/*! \class
  *
- *  Channel: -1 = (fixed) tsv-region
+ *  : -1 = (fixed) tsv-region
              0  = filled silicon
-             1  = channel fluid
-             2  = channel inlet
-             3  = channel outlet
+             1  = mchannel fluid
+             2  = mchannel inlet
+             3  = mchannel outlet
  */
 
 typedef struct {
@@ -59,10 +58,52 @@ typedef struct {
     int index;
 }node;
 
-class Channel
+class Location{
+public:
+    Location(){
+        row=-1;
+        col=-1;
+    }
+    Location(int r,int c){
+        row=r;
+        col=c;
+    }
+    Location(const Location& rhs){
+        row=rhs.row;
+        col=rhs.col;
+    }
+    Location& operator=(const Location& rhs){
+        row=rhs.row;
+        col=rhs.col;
+
+        return (*this);
+    }
+
+    void setRow(int r){
+        row=r;
+    }
+
+    void setCol(int c){
+        col=c;
+    }
+
+    int getRow(){
+        return row;
+    }
+
+    int getCol(){
+        return col;
+    }
+
+private:
+    int row;
+    int col;
+};
+
+class mchannel
 {
 public:
-  Channel(){
+  mchannel(){
       _array_ptr = new int[101*101];
       memset(_array_ptr, 0, 101*101*sizeof(int));
 
@@ -70,7 +111,7 @@ public:
       memcpy(_array_mark, _array_ptr, 101*101*sizeof(int));
   }
   /// \brief construct function
-  Channel(size_t N_h, size_t N_w, const char* channel_template_file)
+  mchannel(size_t N_h, size_t N_w, const char* channel_template_file)
     : _N_h(N_h), _N_w(N_w), _array_ptr(NULL),_array_mark(NULL)
   {
     read_from_file(N_h, N_w, channel_template_file);
@@ -78,7 +119,7 @@ public:
     memcpy(_array_mark, _array_ptr, 101*101*sizeof(int));
   }
   /// \brief construct function
-  Channel(size_t N_h, size_t N_w)
+  mchannel(size_t N_h, size_t N_w)
   {
       _N_h=N_h;
       _N_w=N_w;
@@ -93,7 +134,7 @@ public:
     debug_channel1<<(*this);
   }
 
-  Channel operator =(const Channel& rhs){
+  mchannel operator =(const mchannel& rhs){
         _N_h=rhs._N_h;
         _N_w=rhs._N_w;
 //        memcpy(_array_ptr, rhs._array_ptr, _N_h*_N_w*sizeof(int));
@@ -106,7 +147,7 @@ public:
   }
 
   /// \brief deconstruct function
-  Channel(const Channel& rhs)
+  mchannel(const mchannel& rhs)
     : _N_h(rhs._N_h), _N_w(rhs._N_w)
   {
     _array_ptr = new int[_N_h*_N_w];
@@ -117,7 +158,7 @@ public:
   }
 
   /// \brief deconstruct function
-  ~Channel()
+  ~mchannel()
   {
     clear();
   }
@@ -168,34 +209,34 @@ public:
     size_t j = k % _N_w;
     switch (ind)
       {
-      case 0:
-	if (i==0)
-	  return _N_h*_N_w+1;
-	else
-	  return (i-1)*_N_w+j;
-	break;
-      case 1:	
-	if (i==_N_h-1)
-	  return _N_h*_N_w+1;
-	else
-	  return (i+1)*_N_w+j;
-	break;
-      case 2:
-	if (j==0)
-	  return _N_h*_N_w+1;
-	else
-	  return i*_N_w+j-1;
-	break;
-      case 3:
-	if (j==_N_w-1)
-	  return _N_h*_N_w+1;
-	else
-	  return i*_N_w+j+1;
-	break;
-	break;
-      default:
-	std::cout<<"Error neighbor index!"<<std::endl;
-	exit(-1);
+         case 0:
+        if (i==0)
+          return _N_h*_N_w+1;
+        else
+          return (i-1)*_N_w+j;
+        break;
+        case 1:
+        if (i==_N_h-1)
+          return _N_h*_N_w+1;
+        else
+          return (i+1)*_N_w+j;
+        break;
+        case 2:
+        if (j==0)
+          return _N_h*_N_w+1;
+        else
+          return i*_N_w+j-1;
+        break;
+        case 3:
+        if (j==_N_w-1)
+          return _N_h*_N_w+1;
+        else
+          return i*_N_w+j+1;
+        break;
+        break;
+        default:
+        std::cout<<"Error neighbor index!"<<std::endl;
+        exit(-1);
       }
     
   }
@@ -210,10 +251,10 @@ public:
   void correct();
 
   /// \brief output
-  friend ostream& operator<(ostream& os, const Channel& rhs);
+  friend ostream& operator<(ostream& os, const mchannel& rhs);
 
   /// \brief output to file, these two function can be combined, do it later
-  friend ostream& operator<<(ostream& os, const Channel& rhs);
+  friend ostream& operator<<(ostream& os, const mchannel& rhs);
 
   /// \brief get the total number of adjancent "1" "2" "3" cell number
   int adjancentLiquidCellNumber(size_t row,size_t col);
@@ -257,7 +298,7 @@ private:
   
 }; // class Channel
 
-inline ostream& operator<(ostream& os, const Channel& rhs)
+inline ostream& operator<(ostream& os, const mchannel& rhs)
 {
   os<<"Channel: "<<rhs.Nh()<<" * "<<rhs.Nw()<<std::endl;
   os<<" [ ";
@@ -272,7 +313,7 @@ inline ostream& operator<(ostream& os, const Channel& rhs)
   return os;
 }
 
-inline ostream& operator<<(ostream& os, const Channel& rhs)
+inline ostream& operator<<(ostream& os, const mchannel& rhs)
 {
   for (size_t i=0;i<rhs.Nh();++i)
     {
@@ -288,4 +329,4 @@ inline ostream& operator<<(ostream& os, const Channel& rhs)
 
 /// \brief compare function
 bool compare(node a, node b);//{}
-#endif // _CHANNEL_H_
+#endif // _MCHANNEL_H_
