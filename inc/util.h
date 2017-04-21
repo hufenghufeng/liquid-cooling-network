@@ -15,4 +15,6 @@ double to_double(string &str);
 
 int getNumbits(int num);
 
+
+
 #endif

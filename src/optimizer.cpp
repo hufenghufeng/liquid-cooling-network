@@ -22,20 +22,20 @@ void optimizer::optimize(char* casename){
     std::cout<<"channel num:"<<system.getChannelNum()<<std::endl;
 
     std::cout<<"Please input the total fill steps:"<<std::endl;
-    std::cin>>totalSteps;
+ //   std::cin>>totalSteps;
     std::cout<<"Please input the cooling energy you set:(W)"<<std::endl;
 
- //   totalSteps=300;
-//    setCoolingEnergy=0.0012;
-    cin>>setCoolingEnergy;
+ //   cin>>setCoolingEnergy;
 
-    gettimeofday( &start, NULL );
+
 
     std::string rawcase=string(casename);
     string caseName=rawcase.substr(0,rawcase.find_first_of('/'));
 
+    gettimeofday( &start, NULL );
+
     int initialChannelIndex;
-    for(int i=0;i<caseName.size();++i){
+    for(size_t i=0;i<caseName.size();++i){
         if(isdigit(caseName[i])){
             initialChannelIndex=caseName[i]-'0';
             std::cout<<"Initial channel index is :"<<initialChannelIndex<<endl;
@@ -46,20 +46,26 @@ void optimizer::optimize(char* casename){
     //Subchip mchip(101,101);
     if(system.getChannelNum()>1){
        multilayerchip mchip(system.chip_length()/system.cell_length(),system.chip_width()/system.cell_width(),system.getChannelNum());
-      mchip.config(caseName,totalSteps,initialChannelIndex,setCoolingEnergy);
+      mchip.config("case.ini");
       mchip.beginFilling(system);
     }
     else{
         Subchip chip(system.chip_length()/system.cell_length(),system.chip_width()/system.cell_width());
-        chip.config(caseName,totalSteps,initialChannelIndex,setCoolingEnergy);
+        //chip.config(caseName,totalSteps,initialChannelIndex,setCoolingEnergy);
         //int index=chip.chooseBestIO(system);
         //chip.optimizeBarrier(0.005,system);
+        chip.config("case.ini");
         chip.beginFilling(system);
     }
 
     gettimeofday( &end, NULL );
 
     int timeuse = 1000000 * ( end.tv_sec - start.tv_sec ) + end.tv_usec -start.tv_usec;
-    printf("average time: %d us\n", timeuse/(totalSteps+1));
+    if(system.getChannelNum()>1){
+        printf("average time: %d us\n", timeuse/(50+1));
+    }
+    else{
+       printf("average time: %d us\n", timeuse/(50+1));
+    }
 
 }

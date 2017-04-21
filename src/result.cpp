@@ -1,4 +1,25 @@
-#include "result.h"
+#include "../inc/result.h"
+
+void Result::cleanResult(){
+    pressure.clear();
+    maxT.clear();
+    dTTop.clear();
+    dTBottom.clear();
+    dT.clear();
+    CE.clear();
+
+    bestPressure=99999999;
+    bestTmax=9999999;
+    bestDeltaT=9999999;
+    bestCE=9999999;
+    bestStep=-1;
+
+    if (bestChannel!=NULL){
+        delete [] bestChannel;
+    }
+    bestChannel = new int[_N_h*_N_w];
+    memset(bestChannel, 0, _N_h*_N_w*sizeof(int));
+}
 
 void Result::initialBestChannel(size_t rowSize, size_t colSize){
     _N_h=rowSize;
@@ -27,6 +48,11 @@ ostream& Result::operator<<(ostream& os, const Result& rhs){
     return os;
 }*/
 
+Channel Result::getBestChannel(){
+    Channel tempChannel(_N_h,_N_w,bestChannel);
+    return  tempChannel;
+}
+
 void Result::outputResult(){
     std::ofstream fout;
     fout.open("bestChannel.dat");
@@ -47,31 +73,37 @@ void Result::outputResult(){
    fout.open("history.dat");
     //  add % for the convenience of reading of matlab
    fout<<"% pressure"<<std::endl;
-   for(vector<float>::iterator iter=pressure.begin();iter!=pressure.end();iter++){
+   for(vector<double>::iterator iter=pressure.begin();iter!=pressure.end();iter++){
        fout<<*iter<<' ';
    }
    fout<<std::endl;
 
    fout<<"% max T"<<std::endl;
-    for(vector<float>::iterator iter=maxT.begin();iter!=maxT.end();iter++){
+    for(vector<double>::iterator iter=maxT.begin();iter!=maxT.end();iter++){
         fout<<*iter<<' ';
     }
     fout<<std::endl;
 
     fout<<"% dt of top layer"<<std::endl;
-    for(vector<float>::iterator iter=dTTop.begin();iter!=dTTop.end();iter++){
+    for(vector<double>::iterator iter=dTTop.begin();iter!=dTTop.end();iter++){
         fout<<*iter<<' ';
     }
     fout<<std::endl;
 
     fout<<"% dt of bottom layer"<<std::endl;
-    for(vector<float>::iterator iter=dTBottom.begin();iter!=dTBottom.end();iter++){
+    for(vector<double>::iterator iter=dTBottom.begin();iter!=dTBottom.end();iter++){
         fout<<*iter<<' ';
     }
     fout<<std::endl;
 
     fout<<"% dt "<<std::endl;
-    for(vector<float>::iterator iter=dT.begin();iter!=dT.end();iter++){
+    for(vector<double>::iterator iter=dT.begin();iter!=dT.end();iter++){
+        fout<<*iter<<' ';
+    }
+    fout<<std::endl;
+
+    fout<<"% cooling energy "<<std::endl;
+    for(vector<double>::iterator iter=CE.begin();iter!=CE.end();iter++){
         fout<<*iter<<' ';
     }
     fout<<std::endl;
@@ -85,5 +117,6 @@ void Result::outputResult(){
     std::cout<<"* best Tman    :"<<bestTmax<<std::endl;
     std::cout<<"* best DeltaT  :"<<bestDeltaT<<std::endl;
     std::cout<<"* best step    :"<<bestStep<<std::endl;
+    std::cout<<"* best CE      :"<<bestCE<<std::endl;
     std::cout<<"****************************"<<std::endl;
 }

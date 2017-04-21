@@ -35,6 +35,7 @@
 #include <string.h>
 #include <assert.h>
 #include <algorithm>
+#include <math.h>
 #include "util.h"
 
 using std::vector;
@@ -50,9 +51,15 @@ using std::istream;
              2  = mchannel inlet
              3  = mchannel outlet
  */
+const double PI=3.1415926;
+const int INPUT=2;
+const int OUTPUT=3;
+const int TSV=-1;
+const int SOLID=0;
+const int LIQUID=1;
 
 typedef struct {
-    float temperature;
+    double temperature;
     int cell;
     int mark;
     int index;
@@ -100,6 +107,48 @@ private:
     int col;
 };
 
+#define CHANNELSIZE 101
+#define LINE_SIZE   1024
+
+#define SOLID       0
+#define CHANNEL     1
+#define INLET    2
+#define OUTLET   3
+
+#define MARKEDCHANNEL     11
+#define MARKEDINLET    12
+#define MARKEDOUTLET   13
+
+#define REMARKEDCHANNEL     21
+#define REMARKEDINLET    22
+#define REMARKEDOUTLET   23
+
+//#define PRINTMATRIX 0
+//#define PRINTLOCATION 0
+
+typedef int** channelT;
+typedef int rowT;
+typedef int colT;
+
+typedef struct{
+    int row;
+    int column;
+}locationT;
+
+typedef struct{
+    int row_size;
+    int column_size;
+}sizeT;
+
+typedef enum{
+    InletUntip,
+    InletTiped,
+    OutletUntip,
+    OutletTiped
+}IOkindT;
+
+
+
 class mchannel
 {
 public:
@@ -128,10 +177,11 @@ public:
 
     _array_mark = new int[_N_h*_N_w];
     memcpy(_array_mark, _array_ptr, _N_h*_N_w*sizeof(int));
-
+/*
     std::ofstream debug_channel1;
     debug_channel1.open("afterChannel.dat");
     debug_channel1<<(*this);
+    */
   }
 
   mchannel operator =(const mchannel& rhs){
@@ -250,6 +300,9 @@ public:
   /// \brief correct the channel
   void correct();
 
+  /// \brief new correct
+  void newCorrect();
+
   /// \brief output
   friend ostream& operator<(ostream& os, const mchannel& rhs);
 
@@ -272,8 +325,48 @@ public:
   void fillSolid(size_t row, size_t col);
 
   /// \brief choose and mark cell
-  vector<int> chooseCell(const float *Tmap, int num);
-  
+  vector<int> chooseCell(const double *Tmap, int num);
+
+  /// \brief fill hot area with straight line
+  void fillHotArea(const double *Tmap1, const double *Tmap2, double percent);
+  /*
+  %   pre-locate straght channel in output area
+  %
+  %   Detect the output automatically
+  %
+  %   ____________
+  %  | T1  |  T3  |
+  %  |_____|______|
+  %  | T2  |  T4  |
+  %  |_____|______|
+  %
+  % for example
+  % part4:
+  %   pattern 1:
+  %   |
+  %   | |
+  %   | | |
+  %   | | | |
+  %   pattern 2:
+  %   ________
+  %     ______
+  %       ____
+  %         __
+  %
+  */
+  void fillOutputArea(int size=26);
+  ///brief fill center hot area
+  /*
+  %fill the middle area as the following show:
+   %   2  2   2  2
+  % 3       0      3
+  % 3     0 0 0    3
+  %    0 0 0 0 0 0
+  % 2     0 0 0    3
+  % 2       0      3
+  %    3  3   2  2
+  */
+  void fillMidArea(int size);
   /// \brief after choose cell, you must mark this cell
   void markCell(int index);
 
@@ -287,6 +380,89 @@ public:
 
     /// \brief draw line in channel
     void drawLine(int x1, int y1, int x2, int y2);
+
+    void drawFourSameLine(int length,double theta);
+
+
+    /*
+     *channel :The channel to fill
+     *size    :The size of the channel
+     *
+     */
+
+     channelT ChooseIOAndCheckConnect(channelT channel,sizeT size);
+
+    /*
+     * channel :The channel to fill
+     *(row,col):the beginning of recursive
+     * size    :The size of the channel
+     *
+     *this is part of AndCheckConnect
+     *make tip of neighbor block recursively,if the block is 1,2 or 3
+     *then change them to 11,12,13
+     */
+
+     void MakeTips  (channelT channel,rowT row,colT col,sizeT size);
+
+    /*
+     * channel :The channel to fill
+     *(row,col):the beginning of recursive
+     * size    :The size of the channel
+     *
+     *this is part of AndCheckConnect
+     *make tip of neighbor block recursively,if the block is 11,12 or 13
+     *then change them to 21,22,23
+     */
+
+     void ReMakeTips(channelT channel,rowT row,colT col,sizeT size);
+
+    /*
+     *
+     * recover marked block and fill unmarked block
+     *
+     *
+     */
+
+     channelT RecoverTips(channelT channel,sizeT size);
+
+    /*
+     *function:  IOlocationT
+     *return the one location of the IO you want
+     *return (0,0): there is no the IO you want
+     */
+
+     locationT IOExamine(channelT channel, IOkindT IOkind, sizeT size);
+
+    /*
+     * function : GetMatrixSize
+     * return the size of Matrix of channel
+     * row   : the row    number
+     * column: the column number
+     */
+
+     sizeT  GetMatrixSize    (FILE* fp);
+
+    /*
+     * function:
+     * read channel matrix,allocate memory and return pointer pointing to it
+     * you need provide FILE pointer and close by yourself
+     */
+
+     channelT ReadChannelMatrix(FILE* fp, int RowNum,int ColNum);
+
+    /*
+     * fill the channel that has been tiped
+     *
+     */
+
+     void FillTips(channelT channel,sizeT size);
+
+    /*
+     *
+     * get the tiped channel and output to a file
+     *
+     */
+     void PrintMaxtrix(channelT channel,sizeT size);
 
 private:
   /// \brief number of grids 

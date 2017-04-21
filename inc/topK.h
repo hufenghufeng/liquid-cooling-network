@@ -6,11 +6,11 @@ class topK{
 public:
     topK(){}
 
-    void maxHeapify(float* array, const int size, int i){
+    void maxHeapify(double* array, const int size, int i){
         int left =2*i+1;
         int right=2*i+2;
         int largest=i;
-        float temp;
+        double temp;
 
         if((left<size)&&(array[left]>array[i])){
             largest=left;
@@ -28,7 +28,7 @@ public:
         }
     }
 
-    void buildMaxHeap(float* array, const int size){
+    void buildMaxHeap(double* array, const int size){
         int index=size/2-1;
         for(int i=index; i>=0; i--){
             maxHeapify(array,size,i);
@@ -39,8 +39,8 @@ public:
         }
     }
 
-    void heapSort(float* array, const int size){
-        float temp=0;
+    void heapSort(double* array, const int size){
+        double temp=0;
         int mySize=size;
         buildMaxHeap(array,size);
 
@@ -56,8 +56,8 @@ public:
 
     }
 
-    void minimunN(float* array, const int length, const int n){
-        float temp=0;
+    void minimunN(double* array, const int length, const int n){
+        double temp=0;
         buildMaxHeap(array,n);
 
         // compare the rest number with the top number in heap

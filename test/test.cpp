@@ -1,10 +1,13 @@
 
 #include <iostream>
-#include "Channel.h"
-#include "Location.h"
+#include "mchannel.h"
+//#include "Location.h"
 #include "subchip.h"
 #include "tmap.h"
 #include "util.h"
+
+#include "topK.h"
+
 using namespace std;
 
 int main(){
@@ -50,6 +53,22 @@ int main(){
  //   coolingEnergy=atof(line.c_str());
 
  //   std::cout<<coolingEnergy;
+
+
+    topK myCold;
+
+    float mytest[5]={1.1,0.9,0.4,2.4,1.4};
+    myCold.minimunN(mytest,5,2);
+//    myCold.heapSort(mytest,5);
+    for(int i=0;i<5;i++){
+        std::cout<<mytest[i]<<' ';
+    }
+
+    int a=1;
+    int b=2;
+    swap(a,b);
+    std::cout<<"a:"<<a<<" b:"<<b<<std::endl;
+
 
     Subchip chip(101,101,"/home/hf/new-ice/bin/output1.txt","/home/hf/new-ice/bin/output2.txt","/home/hf/new-ice/bin/case1/test_case_01.stk");
     std::ofstream debug_channel1;

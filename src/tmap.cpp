@@ -1,4 +1,4 @@
-#include "tmap.h"
+#include "../inc/tmap.h"
 
  /*Tmap::Tmap(){
     _N_h=0;
@@ -9,6 +9,14 @@
     deltaT=0.0;
 }*/
 
+/*
+%  ____________
+%  | T1           |        T3        |
+%  |_____|______|
+%  | T2           |        T4        |
+%  |_____|______|
+*/
+
 void Tmap::read_from_file(size_t N_h, size_t N_w,
                  const char* Tmap_template_file)
 {
@@ -18,8 +26,8 @@ void Tmap::read_from_file(size_t N_h, size_t N_w,
   _N_h = N_h;
   _N_w = N_w;
 
-  _array_temperature = new float[_N_h*_N_w];
-  memset(_array_temperature, 0, _N_h*_N_w*sizeof(float));
+  _array_temperature = new double[_N_h*_N_w];
+  memset(_array_temperature, 0, _N_h*_N_w*sizeof(double));
   // read from file.
   // todo !!!!!!!!!!!!!!!!
 
@@ -37,8 +45,8 @@ void Tmap::read_from_file(size_t N_h, size_t N_w,
     }
   }
   //show
-  //for (float i = 0; i < _N_h; i++) {
-  //	  for (float j = 0; j < _N_w; j++) {
+  //for (double i = 0; i < _N_h; i++) {
+  //	  for (double j = 0; j < _N_w; j++) {
   //		  std::cout << _array_temperature[i*_N_w + j] << " ";
   //	  }
   //	  std::cout << std::endl;
@@ -53,7 +61,7 @@ void Tmap::caculateTmap(){
         Tmax=_array_temperature[0];
         Tmin=Tmax;
 
-        for(int i=1;i<_N_h*_N_w-1;i=i+2){
+        for(unsigned int i=1;i<_N_h*_N_w-1;i=i+2){
             if(_array_temperature[i]>_array_temperature[i+1]){
                 if (_array_temperature[i]>Tmax){
                     Tmax=_array_temperature[i];
@@ -74,7 +82,7 @@ void Tmap::caculateTmap(){
     }
     //even
     else{
-        for(int i=0;i<_N_h*_N_w;i=i+2){
+        for(unsigned int i=0;i<_N_h*_N_w;i=i+2){
             if(_array_temperature[i]>_array_temperature[i+1]){
                 if (_array_temperature[i]>Tmax){
                     Tmax=_array_temperature[i];
@@ -97,7 +105,7 @@ void Tmap::caculateTmap(){
 }
 
 void Tmap::turnOverMatrix(){
-    float temp;
+    double temp;
         size_t halfHeight=_N_h/2;
         for(size_t i=0;i<halfHeight;i++){
             for(size_t j=0;j<_N_w;j++){
@@ -107,7 +115,7 @@ void Tmap::turnOverMatrix(){
             }
         }
 }
-
+/*
 void Tmap::updateTmap(const char* Tmap_template_file){
 
     std::string line;
@@ -152,4 +160,83 @@ void Tmap::updateTmap(const char* Tmap_template_file){
     turnOverMatrix();
 //    Tmap_file.clear();
     Tmap_file1.close();
+}
+*/
+void Tmap::updateTmap(ddmat ts){
+//    std::cout<<"\n Let's see ts[0](5,5)"<<ts(5,5)<<std::endl;
+    for(size_t i=0;i<_N_h;++i){
+        for(size_t j=0;j<_N_w;++j){
+            _array_temperature[i*_N_w+j]=ts(i,j);
+        }
+    }
+    std::cout<<"\n Let's see _array_temperature(15)"<<_array_temperature[15]<<std::endl;
+    caculateTmap();
+}
+//check is needed, improvement
+double Tmap::maxTPart1(double &partMinT){
+    double maxT=-1;
+    double minT=-1;
+    for(unsigned int i=0;i<_N_h/2;++i){
+        for(unsigned int j=0;j<_N_w/2;++j){
+            if(_array_temperature[i*_N_w+j]<minT){
+                minT=_array_temperature[i*_N_w+j];
+            }
+            if(_array_temperature[i*_N_w+j]>maxT){
+                maxT=_array_temperature[i*_N_w+j];
+            }
+        }
+    }
+    partMinT=minT;
+    return maxT;
+}
+
+double Tmap::maxTPart2(double &partMinT){
+    double maxT=-1;
+    double minT=-1;
+    for(unsigned int i=_N_h/2+1;i<_N_h;++i){
+        for(unsigned int j=0;j<_N_w/2;++j){
+            if(_array_temperature[i*_N_w+j]<minT){
+                minT=_array_temperature[i*_N_w+j];
+            }
+            if(_array_temperature[i*_N_w+j]>maxT){
+                maxT=_array_temperature[i*_N_w+j];
+            }
+        }
+    }
+    partMinT=minT;
+    return maxT;
+}
+
+double Tmap::maxTPart3(double &partMinT){
+    double maxT=-1;
+    double minT=-1;
+    for(unsigned int i=0;i<_N_h/2;++i){
+        for(unsigned int j=_N_w/2+1;j<_N_w;++j){
+            if(_array_temperature[i*_N_w+j]<minT){
+                minT=_array_temperature[i*_N_w+j];
+            }
+            if(_array_temperature[i*_N_w+j]>maxT){
+                maxT=_array_temperature[i*_N_w+j];
+            }
+        }
+    }
+    partMinT=minT;
+    return maxT;
+}
+
+double Tmap::maxTPart4(double &partMinT){
+    double maxT=-1;
+    double minT=-1;
+    for(unsigned int i=_N_h/2+1;i<_N_h;++i){
+        for(unsigned int j=_N_w/2+1;j<_N_w;++j){
+            if(_array_temperature[i*_N_w+j]<minT){
+                minT=_array_temperature[i*_N_w+j];
+            }
+            if(_array_temperature[i*_N_w+j]>maxT){
+                maxT=_array_temperature[i*_N_w+j];
+            }
+        }
+    }
+    partMinT=minT;
+    return maxT;
 }
